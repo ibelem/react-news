@@ -174,8 +174,8 @@ const Button = ({ onClick, className, children }) => {
 
 class App extends Component {
 
-  constructor(pros) {
-    super(pros);
+  constructor(props) {
+    super(props);
 
     this.state = {
       list,

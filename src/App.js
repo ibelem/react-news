@@ -42,8 +42,8 @@ const isSearched = searchTerm => item => item.title.toLowerCase().includes(searc
 
 class App extends Component {
 
-  constructor(pros) {
-    super(pros);
+  constructor(props) {
+    super(props);
 
     this.state = {
       list,
