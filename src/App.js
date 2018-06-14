@@ -1,147 +1,140 @@
 import React, { Component } from 'react';
-// import logo from './logo.svg';
 import './App.css';
-
-
-const list = [
-  {
-    title: '中国',
-    url: 'https://facebook.github.io/react',
-    author: '民族',
-    num_comments: 3,
-    points: 4,
-    objectID: 1,
-  },
-  {
-    title: '世界',
-    url: 'https://github.com/reactjs/redux',
-    author: '全球',
-    num_comments: 20,
-    points: 5,
-    objectID: 2,
-  },
-  {
-    title: 'React',
-    url: 'https://github.com/reactjs/redux',
-    author: 'Daniel',
-    num_comments: 2,
-    points: 5,
-    objectID: 3,
-  },
-  {
-    title: 'Redux',
-    url: 'https://github.com/reactjs/redux',
-    author: 'Dan Abramov, Andrew Clark',
-    num_comments: 2,
-    points: 5,
-    objectID: 4,
-  },
-];
-
-const isSearched = searchTerm => item => item.title.toLowerCase().includes(searchTerm.toLowerCase());
+import { 
+  DEFAULT_QUERY,
+  DEFAULT_HPP,
+  PATH_BASE,
+  PATH_SEARCH,
+  PARAM_SEARCH,
+  PARAM_PAGE,
+  PARAM_HPP,
+} from './constants';
+import { Button } from './Buttons';
+import { Search } from './Search';
+import { Table } from './Table';
 
 class App extends Component {
-
   constructor(props) {
     super(props);
 
     this.state = {
-      list,
-      searchTerm: ''
+      results: null,
+      searchKey: '',
+      searchTerm: DEFAULT_QUERY,
+      error: null,
     };
 
-    this.onDismiss = this.onDismiss.bind(this);
-    this.onClickMe1 = this.onClickMe1.bind(this); //FB preferred
-    //this.onClickMe2 - No necessary to bind here
+    this.setSearchTopStories = this.setSearchTopStories.bind(this);
+    this.fetchSearchTopStories = this.fetchSearchTopStories.bind(this);
     this.onSearchChange = this.onSearchChange.bind(this);
+    this.onSearchSubmit = this.onSearchSubmit.bind(this);
+    this.onDismiss = this.onDismiss.bind(this);
+    this.needsToSearchTopStories = this.needsToSearchTopStories.bind(this);
   }
 
-  onClickMe1() {
-    console.log(this);
+  setSearchTopStories(result) {
+    const { hits, page } = result;
+    const { searchKey, results } = this.state;
+    const oldHits = results && results[searchKey] ? results[searchKey].hits : [];
+    const updatedHits = [...oldHits, ...hits];
+  
+    this.setState({
+      results: {
+        ...results, 
+        [searchKey]: { hits: updatedHits, page }
+      }
+    });
   }
 
-  onClickMe2 = () => {
-    console.log(this);
+  fetchSearchTopStories(searchTerm, page = 0) {
+    const URL = `${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}&${PARAM_PAGE}${page}&${PARAM_HPP}${DEFAULT_HPP}`;
+    console.log(URL);
+
+    fetch(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}&${PARAM_PAGE}${page}&${PARAM_HPP}${DEFAULT_HPP}`)
+      .then(response=> response.json())
+      .then(result => this.setSearchTopStories(result))
+      .catch(e => this.setState({ error: e }));
   }
 
   onDismiss(id) {
+    const { searchKey, results } = this.state;
+    const { hits, page } = results[searchKey];
+
     const isNotId = item => item.objectID !== id;
-    const updatedList = this.state.list.filter(isNotId);
-    this.setState({ list: updatedList });
+    const updatedHits = hits.filter(isNotId);
+
+    this.setState({ 
+      results: { 
+        ...results, 
+        [searchKey]: { hits: updatedHits, page }
+      }
+    });
+  }
+
+  needsToSearchTopStories(searchTerm) {
+    return !this.state.results[searchTerm];
   }
 
   onSearchChange(event) {
-    this.setState({ searchTerm: event.target.value })
+    this.setState({ searchTerm: event.target.value });
+  }
+
+  onSearchSubmit(event){
+    const {searchTerm} = this.state;
+    this.setState({ searchKey: searchTerm });
+    if(this.needsToSearchTopStories(searchTerm)) {
+      this.fetchSearchTopStories(searchTerm);
+    }
+    event.preventDefault();
+  }
+
+  componentDidMount() {
+    const {searchTerm} = this.state;
+    this.setState({ searchKey: searchTerm });
+    this.fetchSearchTopStories(searchTerm);
   }
 
   // render() {
+  //   const { searchTerm, result } = this.state;
+  //   if(!result) { return null; }
+  //   console.log(this.state);
+
   //   return (
-  //     <div className='App'>
-  //       { this.state.list.map(item =>  
-  //         <div key={item.objectID}>
-  //           <span><a href={item.url}>{item.objectID} {item.title}</a></span> 
-  //           <span>{item.author}</span> 
-  //           <span>{item.num_comments}</span> 
-  //           <span>{item.points}</span>
-  //           <span>
-  //             <button onClick={ () => this.onDismiss(item.objectID)} type='button'>
-  //              Dismiss
-  //             </button>
-  //           </span>
-  //         </div>
-  //       )}
+  //     <div className='page'>
+  //       <div className='interactions'>
+  //         <Search value={searchTerm} onChange={this.onSearchChange} onSubmit={this.onSearchSubmit}>
+  //         Search
+  //         </Search>
+  //       </div>
+  //       { 
+  //         result && <Table list={result.hits} pattern={searchTerm} onDismiss={this.onDismiss} />
+  //       }
+  //     </div>
   //   );
   // }
+ 
 
   render() {
-    const { searchTerm, list } = this.state;
+    const { searchTerm, results, searchKey, error } = this.state;
+    const page = (results && results[searchKey] && results[searchKey].page) || 0;
+    const list = (results && results[searchKey] && results[searchKey].hits) || [];
+    console.log(this.state);
+
     return (
-      <div className='App'>
-        {list.map(item => {
-          const onHandlerDismiss = () => {
-            this.onDismiss(item.objectID)
-          }
-
-          return (
-            <div key={item.objectID}>
-              <span><a href={item.url}>{item.objectID} {item.title}</a></span>
-              <span>{item.author}</span>
-              <span>{item.num_comments}</span>
-              <span>{item.points}</span>
-              <span>
-                <button onClick={onHandlerDismiss} type='button'>
-                  Dismiss
-              </button>
-              </span>
-            </div>
-          )
-
+      <div className='page'>
+        <div className='interactions'>
+          <Search value={searchTerm} onChange={this.onSearchChange} onSubmit={this.onSearchSubmit}>
+          Search
+          </Search>
+        </div>
+        { error ? <div className='page'>{ error.toString() }</div>
+          : <Table list={list} onDismiss={this.onDismiss} />
         }
-
-        )}
-
-        <button onClick={() => this.onClickMe1()} type='button'>
-          Click Me 1
-        </button>
-
-        <button onClick={this.onClickMe2} type='button'>
-          Click Me 2
-        </button>
-
-        <button onClick={console.log('CHINA3')} type='button'>
-          Click Me 3
-        </button>
-
-        <button onClick={() => { console.log('CHINA4') }} type='button'>
-          Click Me 4
-        </button>
-
-        <form>
-          <input type='text' onChange={ this.onSearchChange } value={searchTerm} />
-        </form>
-        { list.filter(isSearched(this.state.searchTerm)).map(
-          item => item.title
-        )}
+        <div className='interactions'>
+          <Button onClick={()=> this.fetchSearchTopStories(searchKey, page + 1)}>
+          More 
+          </Button>
+        </div>
       </div>
     );
   }
