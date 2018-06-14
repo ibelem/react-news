@@ -62,8 +62,10 @@ describe('Table', ()=> {
       { title: '1', author: '1', num_comments: 1, points: 2, objectID: 'y' },
       { title: '2', author: '2', num_comments: 1, points: 2, objectID: 'z' },
       { title: '3', author: '3', num_comments: 2, points: 3, objectID: 'x' },
-    ]
-  }
+    ],
+    sortKey: 'TITLE',
+    isSortReverse: false,
+  };
 
   it('renders without crashing', () => {
     const div = document.createElement('div');

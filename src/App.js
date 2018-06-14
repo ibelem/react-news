@@ -1,4 +1,6 @@
 import React, { Component } from 'react';
+import FontAwesomeIcon from '@fortawesome/react-fontawesome';
+import { faSpinner } from '@fortawesome/fontawesome-free-solid';
 import './App.css';
 import { 
   DEFAULT_QUERY,
@@ -13,8 +15,15 @@ import { Button } from './Buttons';
 import { Search } from './Search';
 import { Table } from './Table';
 
-const Loading = () =>
-  <div>Loading ...</div>;
+// const Loading = () =>
+//   <div><FontAwesomeIcon icon={faSpinner} spin size="2x" /></div>;
+
+const withLoading = (Component) => ({isLoading, ...rest}) =>
+  isLoading ? <div><FontAwesomeIcon icon={faSpinner} spin size="2x" /></div>
+    : <Component { ...rest } />;
+
+const ButtonWithLoading = withLoading(Button);
+
 
 class App extends Component {
   constructor(props) {
@@ -26,6 +35,8 @@ class App extends Component {
       searchTerm: DEFAULT_QUERY,
       error: null,
       isLoading: false,
+      sortKey: 'NONE',
+      isSortReverse: false,
     };
 
     this.setSearchTopStories = this.setSearchTopStories.bind(this);
@@ -34,6 +45,12 @@ class App extends Component {
     this.onSearchSubmit = this.onSearchSubmit.bind(this);
     this.onDismiss = this.onDismiss.bind(this);
     this.needsToSearchTopStories = this.needsToSearchTopStories.bind(this);
+    this.onSort = this.onSort.bind(this);
+  }
+
+  onSort(sortKey) {
+    const isSortReverse = this.state.sortKey === sortKey && !this.state.isSortReverse;
+    this.setState({ sortKey, isSortReverse });
   }
 
   setSearchTopStories(result) {
@@ -120,7 +137,9 @@ class App extends Component {
  
 
   render() {
-    const { searchTerm, results, searchKey, error, isLoading } = this.state;
+    const { searchTerm, results, 
+      searchKey, error, isLoading, 
+      sortKey, isSortReverse } = this.state;
     const page = (results && results[searchKey] && results[searchKey].page) || 0;
     const list = (results && results[searchKey] && results[searchKey].hits) || [];
     // console.log(this.state);
@@ -133,16 +152,18 @@ class App extends Component {
           </Search>
         </div>
         { error ? <div className='page'>{ error.toString() }</div>
-          : <Table list={list} onDismiss={this.onDismiss} />
+          : <Table list={list} 
+            sortKey={sortKey}
+            isSortReverse = {isSortReverse}
+            onSort={this.onSort} 
+            onDismiss={this.onDismiss} />
         }
         <div className='interactions'>
-          { isLoading 
-            ? <Loading />
-            : <Button 
-              onClick={()=> this.fetchSearchTopStories(searchKey, page + 1)}>
-            More 
-            </Button>
-          }
+          <ButtonWithLoading
+            isLoading={isLoading}
+            onClick={() => this.fetchSearchTopStories(searchKey, page + 1)}>
+            More
+          </ButtonWithLoading>
         </div>
       </div>
     );
