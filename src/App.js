@@ -47,13 +47,13 @@ class App extends Component {
   }
 
   fetchSearchTopStories(searchTerm, page = 0) {
-    const URL = `${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}&${PARAM_PAGE}${page}&${PARAM_HPP}${DEFAULT_HPP}`;
-    console.log(URL);
+    // const URL = `${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}&${PARAM_PAGE}${page}&${PARAM_HPP}${DEFAULT_HPP}`;
+    // console.log(URL);
 
-    fetch(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}&${PARAM_PAGE}${page}&${PARAM_HPP}${DEFAULT_HPP}`)
-      .then(response=> response.json())
-      .then(result => this.setSearchTopStories(result))
-      .catch(e => this.setState({ error: e }));
+    // fetch(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}&${PARAM_PAGE}${page}&${PARAM_HPP}${DEFAULT_HPP}`)
+    //   .then(response=> response.json())
+    //   .then(result => this.setSearchTopStories(result))
+    //   .catch(e => this.setState({ error: e }));
   }
 
   onDismiss(id) {
@@ -118,7 +118,7 @@ class App extends Component {
     const { searchTerm, results, searchKey, error } = this.state;
     const page = (results && results[searchKey] && results[searchKey].page) || 0;
     const list = (results && results[searchKey] && results[searchKey].hits) || [];
-    console.log(this.state);
+    // console.log(this.state);
 
     return (
       <div className='page'>
@@ -141,3 +141,8 @@ class App extends Component {
 }
 
 export default App;
+export {
+  Button,
+  Search,
+  Table,
+};
