@@ -13,6 +13,9 @@ import { Button } from './Buttons';
 import { Search } from './Search';
 import { Table } from './Table';
 
+const Loading = () =>
+  <div>Loading ...</div>;
+
 class App extends Component {
   constructor(props) {
     super(props);
@@ -22,6 +25,7 @@ class App extends Component {
       searchKey: '',
       searchTerm: DEFAULT_QUERY,
       error: null,
+      isLoading: false,
     };
 
     this.setSearchTopStories = this.setSearchTopStories.bind(this);
@@ -41,19 +45,20 @@ class App extends Component {
     this.setState({
       results: {
         ...results, 
-        [searchKey]: { hits: updatedHits, page }
-      }
+        [searchKey]: { hits: updatedHits, page },
+      },
+      isLoading: false
     });
   }
 
   fetchSearchTopStories(searchTerm, page = 0) {
     // const URL = `${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}&${PARAM_PAGE}${page}&${PARAM_HPP}${DEFAULT_HPP}`;
     // console.log(URL);
-
-    // fetch(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}&${PARAM_PAGE}${page}&${PARAM_HPP}${DEFAULT_HPP}`)
-    //   .then(response=> response.json())
-    //   .then(result => this.setSearchTopStories(result))
-    //   .catch(e => this.setState({ error: e }));
+    this.setState({ isLoading: true });
+    fetch(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}&${PARAM_PAGE}${page}&${PARAM_HPP}${DEFAULT_HPP}`)
+      .then(response=> response.json())
+      .then(result => this.setSearchTopStories(result))
+      .catch(e => this.setState({ error: e }));
   }
 
   onDismiss(id) {
@@ -115,7 +120,7 @@ class App extends Component {
  
 
   render() {
-    const { searchTerm, results, searchKey, error } = this.state;
+    const { searchTerm, results, searchKey, error, isLoading } = this.state;
     const page = (results && results[searchKey] && results[searchKey].page) || 0;
     const list = (results && results[searchKey] && results[searchKey].hits) || [];
     // console.log(this.state);
@@ -131,9 +136,13 @@ class App extends Component {
           : <Table list={list} onDismiss={this.onDismiss} />
         }
         <div className='interactions'>
-          <Button onClick={()=> this.fetchSearchTopStories(searchKey, page + 1)}>
-          More 
-          </Button>
+          { isLoading 
+            ? <Loading />
+            : <Button 
+              onClick={()=> this.fetchSearchTopStories(searchKey, page + 1)}>
+            More 
+            </Button>
+          }
         </div>
       </div>
     );

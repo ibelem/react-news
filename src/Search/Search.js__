@@ -1,0 +1,37 @@
+import React, { Component } from 'react';
+import '../App.css';
+import PropTypes from 'prop-types';
+import { SubmitButton } from '../Buttons';
+
+class Search extends Component {
+
+  componentDidMount(){
+    if(this.input) {
+      this.input.focus();
+    }
+  }
+
+  render() {
+    const { value, onChange, onSubmit, children } = this.props;
+    return (
+      <form onSubmit={onSubmit}>
+        <input 
+          type='text'
+          value={value} 
+          onChange={onChange}
+          ref={(node) => { this.input = node; }}  
+        />
+        <SubmitButton>{ children }</SubmitButton>
+      </form>
+    );
+  }
+}
+
+Search.prototypes = {
+  onChange: PropTypes.func,
+  onSubmit: PropTypes.func,
+  value: PropTypes.string,
+  children: PropTypes.node,
+};
+
+export default Search;
