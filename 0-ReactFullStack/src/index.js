@@ -1,6 +1,6 @@
 require('./index.css');
 let g = document.createElement('div');
-g.innerHTML = 'china today 0';
+g.innerHTML = 'china today 500';
 document.body.appendChild(g);
 
 let text = require('./hello');
