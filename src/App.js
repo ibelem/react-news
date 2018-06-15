@@ -25,6 +25,25 @@ const withLoading = (Component) => ({isLoading, ...rest}) =>
 const ButtonWithLoading = withLoading(Button);
 
 
+const updateSearchTopStoriesState = (hits, page) => (prevState) => {
+  const { searchKey, results } = prevState;
+  const oldHits = results && results[searchKey] 
+    ? results[searchKey].hits 
+    : [];
+  const updatedHits = [
+    ...oldHits, 
+    ...hits
+  ];
+
+  return {
+    results: {
+      ...results, 
+      [searchKey]: { hits: updatedHits, page },
+    },
+    isLoading: false
+  };
+};
+
 class App extends Component {
   constructor(props) {
     super(props);
@@ -35,8 +54,6 @@ class App extends Component {
       searchTerm: DEFAULT_QUERY,
       error: null,
       isLoading: false,
-      sortKey: 'NONE',
-      isSortReverse: false,
     };
 
     this.setSearchTopStories = this.setSearchTopStories.bind(this);
@@ -45,29 +62,13 @@ class App extends Component {
     this.onSearchSubmit = this.onSearchSubmit.bind(this);
     this.onDismiss = this.onDismiss.bind(this);
     this.needsToSearchTopStories = this.needsToSearchTopStories.bind(this);
-    this.onSort = this.onSort.bind(this);
-  }
-
-  onSort(sortKey) {
-    const isSortReverse = this.state.sortKey === sortKey && !this.state.isSortReverse;
-    this.setState({ sortKey, isSortReverse });
   }
 
   setSearchTopStories(result) {
     const { hits, page } = result;
-    const { searchKey, results } = this.state;
-    const oldHits = results && results[searchKey] ? results[searchKey].hits : [];
-    const updatedHits = [...oldHits, ...hits];
-  
-    this.setState({
-      results: {
-        ...results, 
-        [searchKey]: { hits: updatedHits, page },
-      },
-      isLoading: false
-    });
+    this.setState(updateSearchTopStoriesState(hits, page));
   }
-
+    
   fetchSearchTopStories(searchTerm, page = 0) {
     // const URL = `${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}&${PARAM_PAGE}${page}&${PARAM_HPP}${DEFAULT_HPP}`;
     // console.log(URL);
@@ -139,7 +140,9 @@ class App extends Component {
   render() {
     const { searchTerm, results, 
       searchKey, error, isLoading, 
-      sortKey, isSortReverse } = this.state;
+      // sortKey, isSortReverse
+    } = this.state;
+
     const page = (results && results[searchKey] && results[searchKey].page) || 0;
     const list = (results && results[searchKey] && results[searchKey].hits) || [];
     // console.log(this.state);
@@ -153,9 +156,9 @@ class App extends Component {
         </div>
         { error ? <div className='page'>{ error.toString() }</div>
           : <Table list={list} 
-            sortKey={sortKey}
-            isSortReverse = {isSortReverse}
-            onSort={this.onSort} 
+            // sortKey={sortKey}
+            // isSortReverse = {isSortReverse}
+            // onSort={this.onSort} 
             onDismiss={this.onDismiss} />
         }
         <div className='interactions'>

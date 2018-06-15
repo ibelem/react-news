@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {Component} from 'react';
 import '../App.css';
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
 import { faSort } from '@fortawesome/fontawesome-free-solid';
@@ -39,78 +39,105 @@ const Sort = ({ sortKey, onSort, children, activeSortKey }) => {
 Sort.prototypes = {
   onSort: PropTypes.func,
   sortKey: PropTypes.string,
+  activeSortKey: PropTypes.string,
   children: PropTypes.node,
 };
 
-const Table = ({ list, sortKey, isSortReverse, onSort, onDismiss }) => {
-  const smallColumn = {
-    width: '10%',
-  };
+class Table extends Component { 
+  constructor(props){
+    super(props);
+    this.state = {
+      sortKey: 'NONE',
+      isSortReverse: false,
+    };
+    this.onSort = this.onSort.bind(this);
+  }
 
-  const sortedList = SORTS[sortKey](list);
-  const reverseSortedList = isSortReverse 
-    ? sortedList.reverse()
-    : sortedList;
+  onSort(sortKey) {
+    const isSortReverse = this.state.sortKey === sortKey && !this.state.isSortReverse;
+    this.setState({ sortKey, isSortReverse });
+  }
 
-  return (
-    <div className='table'>
-      <div className='table-header'>
-        <span style={{ width: '20%' }}>
-          <Sort
-            sortKey= {'TITLE'}
-            onSort={onSort}
-            activeSortKey = {sortKey}
-          >
-            Title
-          </Sort>
-        </span>
-        <span style={{ width: '20%' }}>
-          <Sort
-            sortKey= {'AUTHOR'}
-            onSort={onSort}
-            activeSortKey = {sortKey}
-          >
-            Author
-          </Sort>
-        </span>
-        <span style={{ width: '20%' }}>
-          <Sort
-            sortKey= {'COMMENTS'}
-            onSort={onSort}
-            activeSortKey = {sortKey}
-          >
-            Comments
-          </Sort>
-        </span>
-        <span style={{ width: '20%' }}>
-          <Sort
-            sortKey= {'POINTS'}
-            onSort={onSort}
-            activeSortKey = {sortKey}
-          >
-            Points
-          </Sort>
-        </span>
+  render() {
+    const {
+      list, 
+      onDismiss 
+    } = this.props;
+
+    const {
+      sortKey, 
+      isSortReverse, 
+    } = this.state;
+  
+    const smallColumn = {
+      width: '10%',
+    };
+
+    const sortedList = SORTS[sortKey](list);
+    const reverseSortedList = isSortReverse 
+      ? sortedList.reverse()
+      : sortedList;
+
+    return (
+      <div className='table'>
+        <div className='table-header'>
+          <span style={{ width: '20%' }}>
+            <Sort
+              sortKey= {'TITLE'}
+              onSort={this.onSort}
+              activeSortKey = {sortKey}
+            >
+              Title
+            </Sort>
+          </span>
+          <span style={{ width: '20%' }}>
+            <Sort
+              sortKey= {'AUTHOR'}
+              onSort={this.onSort}
+              activeSortKey = {sortKey}
+            >
+              Author
+            </Sort>
+          </span>
+          <span style={{ width: '20%' }}>
+            <Sort
+              sortKey= {'COMMENTS'}
+              onSort={this.onSort}
+              activeSortKey = {sortKey}
+            >
+              Comments
+            </Sort>
+          </span>
+          <span style={{ width: '20%' }}>
+            <Sort
+              sortKey= {'POINTS'}
+              onSort={this.onSort}
+              activeSortKey = {sortKey}
+            >
+              Points
+            </Sort>
+          </span>
+        </div>
+        {
+          // list.filter(isSearched(pattern)).map(item =>
+          reverseSortedList.map(item =>
+            <div key={item.objectID} className='table-row'>
+              <span style={{ width: '60%' }}><a href={item.url}>{item.objectID} {item.title}</a></span>
+              <span style={ smallColumn }>{item.author}</span>
+              <span style={{ width: '5%' }}>{item.num_comments}</span>
+              <span style={{ width: '5%' }}>{item.points}</span>
+              <span>
+                <Button onClick={() => onDismiss(item.objectID)} className='button-inline'>
+                Dismiss
+                </Button>
+              </span>
+            </div>
+          )
+        }
       </div>
-      {
-        // list.filter(isSearched(pattern)).map(item =>
-        reverseSortedList.map(item =>
-          <div key={item.objectID} className='table-row'>
-            <span style={{ width: '60%' }}><a href={item.url}>{item.objectID} {item.title}</a></span>
-            <span style={ smallColumn }>{item.author}</span>
-            <span style={{ width: '5%' }}>{item.num_comments}</span>
-            <span style={{ width: '5%' }}>{item.points}</span>
-            <span>
-              <Button onClick={() => onDismiss(item.objectID)} className='button-inline'>
-              Dismiss
-              </Button>
-            </span>
-          </div>
-        )
-      }
-    </div>
-  );
-};
+    );
+  }
+}     
 
 Table.prototypes = {
   list: PropTypes.arrayOf(
