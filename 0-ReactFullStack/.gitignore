@@ -2,6 +2,7 @@
 
 # dependencies
 /node_modules
+node_modules
 
 # testing
 /coverage
@@ -11,6 +12,7 @@
 
 # misc
 /.vscode
+.vscode
 .DS_Store
 .env.local
 .env.development.local
