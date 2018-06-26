@@ -33,5 +33,17 @@
     "eslint": "^4.19.1",
     "eslint-plugin-react": "^7.9.1",
     "webpack": "^4.12.0"
-  }
+  },
+  "description": "React - Hackernews",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ibelem/react-news.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ibelem/react-news/issues"
+  },
+  "homepage": "https://github.com/ibelem/react-news#readme"
 }
